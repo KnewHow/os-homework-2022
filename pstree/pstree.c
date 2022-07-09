@@ -79,20 +79,20 @@ int main(int argc, char *argv[]) {
   }
 
   int pid_max = getMaxPid();
-  printf("max pid is:%d\n", pid_max);
   if(pid_max <=0) {
     printf("pid max is less or equal zero, system error!");
     return EXIT_SUCCESS;
   }
-  struct Process *processList = malloc(pid_max * sizeof(struct Process));
-  for(long i =0; i < pid_max; ++i) {
-    processList[i].pid = -1;
-  }
+  
 
   const char *path = "/proc";
   DIR *d = opendir(path);
   struct dirent *dir;
   if(d) {
+    struct Process *processList = malloc(pid_max * sizeof(struct Process));
+    for(long i =0; i < pid_max; ++i) {
+      processList[i].pid = -1;
+    }
     while((dir = readdir(d)) != NULL) {
       if(isNumber(dir->d_name)) {
         int dname = atoi(dir->d_name);
@@ -107,15 +107,17 @@ int main(int argc, char *argv[]) {
       }
     }
     closedir(d);
+    for(int i = 0; i < pid_max; ++i) {
+      if(processList[i].pid != -1) {
+        printf("%d %s %c %d\n", processList[i].pid, processList[i].comm, processList[i].state, processList[i].ppid);
+      }
+    }
+    free(processList);
   } else {
     printf("can't open path: %s\n", path);
+    return EXIT_FAILURE;
   }
-  for(int i = 0; i < pid_max; ++i) {
-    if(processList[i].pid != -1) {
-      printf("%d %s %c %d\n", processList[i].pid, processList[i].comm, processList[i].state, processList[i].ppid);
-    }
-  }
-  free(processList);
+  
   assert(!argv[argc]);
   return EXIT_SUCCESS;
 }
