@@ -71,6 +71,18 @@ void constructProcess(const char* stat, struct Process *processList) {
   processList[pid].ppid = ppid;
 }
 
+void printProcessTree(int spaceLength, int ppid, struct Process *processList, int length) {
+  for(int i = 0; i < length; ++i) {
+    if(processList[i].pid != -1 && processList[i].ppid == ppid) {
+      for(int j = 0; j < spaceLength; ++j) {
+        printf(" ");
+      }
+      printf("%s\n", processList[i].comm);
+      printProcessTree(spaceLength + 2, processList[i].pid, processList, length);
+    }
+  }
+}
+
 
 int main(int argc, char *argv[]) {
   for (int i = 0; i < argc; i++) {
@@ -107,11 +119,12 @@ int main(int argc, char *argv[]) {
       }
     }
     closedir(d);
-    for(int i = 0; i < pid_max; ++i) {
-      if(processList[i].pid != -1) {
-        printf("%d %s %c %d\n", processList[i].pid, processList[i].comm, processList[i].state, processList[i].ppid);
-      }
-    }
+    // for(int i = 0; i < pid_max; ++i) {
+    //   if(processList[i].pid != -1) {
+    //     printf("%d %s %c %d\n", processList[i].pid, processList[i].comm, processList[i].state, processList[i].ppid);
+    //   }
+    // }
+    printProcessTree(0, 0, processList, pid_max);
     free(processList);
   } else {
     printf("can't open path: %s\n", path);
